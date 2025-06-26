@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemantauan Tugas dengan Pengurusan Pegawai</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gray: #95a5a6;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--dark));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            color: var(--light);
+        }
+        
+        .header-content h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header-content p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .app-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .stat-content .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .stat-pending .stat-icon { background: rgba(243, 156, 18, 0.15); color: var(--warning); }
+        .stat-progress .stat-icon { background: rgba(52, 152, 219, 0.15); color: var(--secondary); }
+        .stat-completed .stat-icon { background: rgba(39, 174, 96, 0.15); color: var(--success); }
+        .stat-total .stat-icon { background: rgba(44, 62, 80, 0.15); color: var(--primary); }
+        .stat-employee .stat-icon { background: rgba(155, 89, 182, 0.15); color: #9b59b6; }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .card-header {
+            padding: 18px 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-header h2 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .btn-purple {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background: #8e44ad;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray);
+            color: var(--dark);
+        }
+        
+        .btn-outline:hover {
+            background: #f8f9fa;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-controls .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-controls button {
+            align-self: flex-end;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            padding: 14px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #e1e5e9;
+            vertical-align: top;
+        }
+        
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+        
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+        }
+        
+        .status-in-progress {
+            background: rgba(52, 152, 219, 0.15);
+            color: var(--secondary);
+        }
+        
+        .status-completed {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success);
+        }
+        
+        .employee-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .employee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .btn-edit {
+            color: var(--secondary);
+            background: rgba(52, 152, 219, 0.15);
+        }
+        
+        .btn-delete {
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.15);
+        }
+        
+        .progress-section {
+            padding: 15px 0;
+        }
+        
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e1e5e9;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .progress-pending { background: var(--warning); }
+        .progress-in-progress { background: var(--secondary); }
+        .progress-completed { background: var(--success); }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+        
+        .employee-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .employee-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #f0f4f8;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .employee-option:hover {
+            background: #e1e9f0;
+        }
+        
+        .employee-option.selected {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e1e5e9;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--secondary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .employee-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .employee-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e1e5e9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        
+        .employee-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <i class="fas fa-tasks logo"></i>
+                <div class="header-content">
+                    <h1>Sistem Pemantauan Tugas dengan Pengurusan Pegawai</h1>
+                    <p>Pantau dan urus tugas harian dengan lebih efisien</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-purple" onclick="openEmployeeModal()">
+                    <i class="fas fa-user-plus"></i> Urus Pegawai
+                </button>
+                <button class="btn-outline" onclick="loadTasks()">
+                    <i class="fas fa-sync-alt"></i> Muat Semula
+                </button>
+            </div>
+        </header>
+        
+        <div class="app-stats">
+            <div class="stat-card stat-pending">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Belum Selesai</h3>
+                    <div class="value">5</div>
+                </div>
+            </div>
+            <div class="stat-card stat-progress">
+                <div class="stat-icon">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Dalam Proses</h3>
+                    <div class="value">3</div>
+                </div>
+            </div>
+            <div class="stat-card stat-completed">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Selesai</h3>
+                    <div class="value">12</div>
+                </div>
+            </div>
+            <div class="stat-card stat-employee">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Jumlah Pegawai</h3>
+                    <div class="value">8</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="app-container">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-plus-circle"></i> Tambah Tugas Baru</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="letterRef">Rujukan Surat</label>
+                        <input type="text" id="letterRef" placeholder="Masukkan rujukan surat">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDesc">Keterangan Tugas</label>
+                        <textarea id="taskDesc" rows="4" placeholder="Terangkan tugas dengan terperinci"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskStatus">Status Tugas</label>
+                            <select id="taskStatus">
+                                <option value="pending">Belum Selesai</option>
+                                <option value="in-progress">Dalam Proses</option>
+                                <option value="completed">Selesai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDate">Tarikh</label>
+                            <input type="date" id="taskDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pegawai Bertugas</label>
+                        <div class="employee-selector" id="employeeSelector">
+                            <!-- Employee options will be loaded here -->
+                        </div>
+                        <input type="hidden" id="selectedEmployeeId">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="addTask()">
+                            <i class="fas fa-plus"></i> Tambah Tugas
+                        </button>
+                        <button class="btn-outline" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Set Semula
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-pie"></i> Statistik Tugas</h2>
+                </div>
+                <div class="card-body">
+                    <div class="progress-section">
+                        <div class="progress-title">
+                            <span>Belum Selesai</span>
+                            <span>25%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-pending" style="width: 25%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-title">
+                            <span>Dalam Proses</span>
+                            <span>15%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-in-progress" style="width: 15%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-title">
+                            <span>Selesai</span>
+                            <span>60%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-completed" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 30px;">
+                        <label>Analisis Tugas</label>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                            <p><i class="fas fa-check-circle" style="color: var(--success);"></i> Tugas selesai: <strong>12</strong> (60%)</p>
+                            <p><i class="fas fa-spinner" style="color: var(--secondary);"></i> Tugas dalam proses: <strong>3</strong> (15%)</p>
+                            <p><i class="fas fa-clock" style="color: var(--warning);"></i> Tugas belum selesai: <strong>5</strong> (25%)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-list"></i> Senarai Tugas & Pegawai Bertugas</h2>
+            </div>
+            <div class="card-body">
+                <div class="filter-controls">
+                    <div class="form-group">
+                        <label for="filterStatus">Status</label>
+                        <select id="filterStatus">
+                            <option value="all">Semua Status</option>
+                            <option value="pending">Belum Selesai</option>
+                            <option value="in-progress">Dalam Proses</option>
+                            <option value="completed">Selesai</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEmployee">Pegawai</label>
+                        <select id="filterEmployee">
+                            <option value="all">Semua Pegawai</option>
+                            <!-- Employee options will be loaded here -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchTask">Carian</label>
+                        <input type="text" id="searchTask" placeholder="Cari tugas...">
+                    </div>
+                    <button class="btn-outline" onclick="filterTasks()">
+                        <i class="fas fa-filter"></i> Tapis
+                    </button>
+                </div>
+                
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th>Rujukan Surat</th>
+                            <th>Keterangan Tugas</th>
+                            <th>Pegawai Bertugas</th>
+                            <th>Status</th>
+                            <th>Tarikh</th>
+                            <th width="120">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody">
+                        <!-- Tasks will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Sistem Pemantauan Kemajuan Tugas dengan Pengurusan Pegawai &copy; 2023 - Hak Cipta Terpelihara</p>
+        </footer>
+    </div>
+    
+    <!-- Modal for Employee Management -->
+    <div class="modal" id="employeeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Pengurusan Pegawai</h3>
+                <button class="close-btn" onclick="closeEmployeeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 'addEmployeeTab')">Tambah Pegawai</button>
+                    <button class="tab-btn" onclick="openTab(event, 'manageEmployeeTab')">Senarai Pegawai</button>
+                </div>
+                
+                <div id="addEmployeeTab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="employeeName">Nama Penuh Pegawai</label>
+                        <input type="text" id="employeeName" placeholder="Masukkan nama penuh">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeePosition">Jawatan</label>
+                        <input type="text" id="employeePosition" placeholder="Masukkan jawatan">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeInitials">Inisial Avatar (2 huruf)</label>
+                        <input type="text" id="employeeInitials" placeholder="Contoh: AB" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeColor">Warna Avatar</label>
+                        <input type="color" id="employeeColor" value="#3498db">
+                    </div>
+                    <button class="btn-purple" style="width: 100%;" onclick="addEmployee()">
+                        <i class="fas fa-user-plus"></i> Tambah Pegawai Baru
+                    </button>
+                </div>
+                
+                <div id="manageEmployeeTab" class="tab-content">
+                    <div class="employee-list" id="employeeList">
+                        <!-- Employee cards will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeEmployeeModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Employees database
+        let employees = {};
+        
+        // Muatkan tugas dan pegawai dari localStorage semasa laman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmployees();
+            initializeSampleData();
+            loadTasks();
+            updateStats();
+            renderEmployeeOptions();
+            renderEmployeeList();
+        });
+        
+        function loadEmployees() {
+            const storedEmployees = localStorage.getItem('employees');
+            if (storedEmployees) {
+                employees = JSON.parse(storedEmployees);
+            } else {
+                // Initialize with sample employees
+                employees = {
+                    1: { id: 1, name: "Ahmad bin Ismail", position: "Pengurus Projek", initials: "AI", color: "#3498db" },
+                    2: { id: 2, name: "Siti Nurhaliza", position: "Pembantu Pentadbiran", initials: "SN", color: "#9b59b6" },
+                    3: { id: 3, name: "Mohd Ali bin Hassan", position: "Jurutera", initials: "MA", color: "#e74c3c" },
+                    4: { id: 4, name: "Tan Mei Ling", position: "Penyelia", initials: "TL", color: "#27ae60" }
+                };
+                localStorage.setItem('employees', JSON.stringify(employees));
+            }
+        }
+        
+        function saveEmployees() {
+            localStorage.setItem('employees', JSON.stringify(employees));
+        }
+        
+        function openEmployeeModal() {
+            document.getElementById('employeeModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            const tabButtons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        function addEmployee() {
+            const name = document.getElementById('employeeName').value;
+            const position = document.getElementById('employeePosition').value;
+            const initials = document.getElementById('employeeInitials').value.toUpperCase();
+            const color = document.getElementById('employeeColor').value;
+            
+            if (!name || !initials || initials.length !== 2) {
+                alert('Sila isi nama dan inisial (2 huruf) dengan lengkap.');
+                return;
+            }
+            
+            // Generate new ID
+            const newId = Date.now();
+            
+            // Add new employee
+            employees[newId] = {
+                id: newId,
+                name,
+                position,
+                initials,
+                color
+            };
+            
+            saveEmployees();
+            renderEmployeeOptions();
+            renderEmployeeList();
+            updateStats();
+            
+            // Reset form
+            document.getElementById('employeeName').value = '';
+            document.getElementById('employeePosition').value = '';
+            document.getElementById('employeeInitials').value = '';
+            
+            alert('Pegawai berjaya ditambah!');
+        }
+        
+        function deleteEmployee(id) {
+            if (!confirm('Adakah anda pasti ingin memadam pegawai ini?')) {
+                return;
+            }
+            
+            delete employees[id];
+            saveEmployees();
+            renderEmployeeOptions();
+            renderEmployeeList();
+            updateStats();
+            
+            alert('Pegawai berjaya dipadam!');
+        }
+        
+        function renderEmployeeOptions() {
+            const employeeSelector = document.getElementById('employeeSelector');
+            const filterEmployee = document.getElementById('filterEmployee');
+            
+            // Clear existing options
+            employeeSelector.innerHTML = '';
+            filterEmployee.innerHTML = '<option value="all">Semua Pegawai</option>';
+            
+            // Add employee options
+            for (const id in employees) {
+                const employee = employees[id];
+                
+                // For task form selector
+                const option = document.createElement('div');
+                option.className = 'employee-option';
+                option.dataset.id = id;
+                option.innerHTML = `
+                    <div class="employee-avatar" style="background: ${employee.color}">${employee.initials}</div>
+                    <span>${employee.name}</span>
+                `;
+                option.onclick = function() {
+                    selectEmployee(this, id);
+                };
+                employeeSelector.appendChild(option);
+                
+                // For filter dropdown
+                const filterOption = document.createElement('option');
+                filterOption.value = id;
+                filterOption.textContent = employee.name;
+                filterEmployee.appendChild(filterOption);
+            }
+        }
+        
+        function renderEmployeeList() {
+            const employeeList = document.getElementById('employeeList');
+            employeeList.innerHTML = '';
+            
+            for (const id in employees) {
+                const employee = employees[id];
+                
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                card.innerHTML = `
+                    <div class="employee-avatar" style="background: ${employee.color}">${employee.initials}</div>
+                    <div>
+                        <div><strong>${employee.name}</strong></div>
+                        <div style="font-size: 0.9rem; color: ${employee.color}">${employee.position}</div>
+                    </div>
+                `;
+                
+                employeeList.appendChild(card);
+            }
+        }
+        
+        function selectEmployee(element, employeeId) {
+            // Remove selected class from all options
+            document.querySelectorAll('.employee-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Set the selected employee ID
+            document.getElementById('selectedEmployeeId').value = employeeId;
+        }
+        
+        function addTask() {
+            const letterRef = document.getElementById('letterRef').value;
+            const taskDesc = document.getElementById('taskDesc').value;
+            const taskStatus = document.getElementById('taskStatus').value;
+            const taskDate = document.getElementById('taskDate').value;
+            const employeeId = document.getElementById('selectedEmployeeId').value;
+            
+            if (!letterRef || !taskDesc || !taskDate || !employeeId) {
+                alert('Sila isi semua medan yang diperlukan termasuk memilih pegawai.');
+                return;
+            }
+            
+            const employee = employees[employeeId];
+            
+            const task = {
+                id: Date.now(),
+                letterRef,
+                taskDesc,
+                taskStatus,
+                taskDate,
+                employeeId,
+                employeeName: employee.name,
+                employeeAvatar: employee.initials,
+                employeeColor: employee.color
+            };
+            
+            // Dapatkan tugas sedia ada dari localStorage
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Kosongkan borang
+            resetForm();
+            
+            // Muat semula senarai tugas
+            loadTasks();
+            updateStats();
+            alert('Tugas berjaya ditambah!');
+        }
+        
+        function resetForm() {
+            document.getElementById('letterRef').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskStatus').value = 'pending';
+            document.getElementById('taskDate').value = '';
+            document.getElementById('selectedEmployeeId').value = '';
+            
+            // Reset employee selection
+            document.querySelectorAll('.employee-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+        }
+        
+        function loadTasks() {
+            const taskTableBody = document.getElementById('taskTableBody');
+            taskTableBody.innerHTML = '';
+            
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            if (tasks.length === 0) {
+                taskTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>Tiada tugas direkodkan. Sila tambah tugas baru.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tasks.forEach(task => {
+                const statusText = task.taskStatus === 'pending' ? 'Belum Selesai' : 
+                                  task.taskStatus === 'in-progress' ? 'Dalam Proses' : 'Selesai';
+                const statusClass = `status-${task.taskStatus}`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.letterRef}</td>
+                    <td>${task.taskDesc}</td>
+                    <td>
+                        <div class="employee-badge">
+                            <div class="employee-avatar" style="background: ${task.employeeColor}">${task.employeeAvatar}</div>
+                            <span>${task.employeeName}</span>
+                        </div>
+                    </td>
+                    <td><span class="status ${statusClass}">${statusText}</span></td>
+                    <td>${formatDate(task.taskDate)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <div class="action-btn btn-edit" onclick="editTask(${task.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="action-btn btn-delete" onclick="deleteTask(${task.id})" title="Padam">
+                                <i class="fas fa-trash-alt"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                taskTableBody.appendChild(row);
+            });
+        }
+        
+        function editTask(id) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const task = tasks.find(task => task.id === id);
+            
+            if (task) {
+                document.getElementById('letterRef').value = task.letterRef;
+                document.getElementById('taskDesc').value = task.taskDesc;
+                document.getElementById('taskStatus').value = task.taskStatus;
+                document.getElementById('taskDate').value = task.taskDate;
+                document.getElementById('selectedEmployeeId').value = task.employeeId;
+                
+                // Select the employee
+                document.querySelectorAll('.employee-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (parseInt(opt.dataset.id) === parseInt(task.employeeId)) {
+                        opt.classList.add('selected');
+                    }
+                });
+                
+                // Scroll to form
+                document.querySelector('.app-container').scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Change button to "Update"
+                const addButton = document.querySelector('.btn-primary');
+                addButton.innerHTML = '<i class="fas fa-sync-alt"></i> Kemaskini Tugas';
+                addButton.onclick = function() {
+                    updateTask(id);
+                };
+            }
+        }
+        
+        function updateTask(id) {
+            const letterRef = document.getElementById('letterRef').value;
+            const taskDesc = document.getElementById('taskDesc').value;
+            const taskStatus = document.getElementById('taskStatus').value;
+            const taskDate = document.getElementById('taskDate').value;
+            const employeeId = document.getElementById('selectedEmployeeId').value;
+            
+            if (!letterRef || !taskDesc || !taskDate || !employeeId) {
+                alert('Sila isi semua medan yang diperlukan.');
+                return;
+            }
+            
+            const employee = employees[employeeId];
+            
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.map(task => {
+                if (task.id === id) {
+                    return {
+                        ...task,
+                        letterRef,
+                        taskDesc,
+                        taskStatus,
+                        taskDate,
+                        employeeId,
+                        employeeName: employee.name,
+                        employeeAvatar: employee.initials,
+                        employeeColor: employee.color
+                    };
+                }
+                return task;
+            });
+            
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Reset form and button
+            resetForm();
+            const addButton = document.querySelector('.btn-primary');
+            addButton.innerHTML = '<i class="fas fa-plus"></i> Tambah Tugas';
+            addButton.onclick = addTask;
+            
+            // Reload tasks and stats
+            loadTasks();
+            updateStats();
+            alert('Tugas berjaya dikemaskini!');
+        }
+        
+        function deleteTask(id) {
+            if (!confirm('Adakah anda pasti ingin memadam tugas ini?')) {
+                return;
+            }
+            
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.filter(task => task.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Reset form if task being edited is deleted
+            const addButton = document.querySelector('.btn-primary');
+            if (addButton.textContent.includes('Kemaskini')) {
+                resetForm();
+                addButton.innerHTML = '<i class="fas fa-plus"></i> Tambah Tugas';
+                addButton.onclick = addTask;
+            }
+            
+            loadTasks();
+            updateStats();
+            alert('Tugas berjaya dipadam!');
+        }
+        
+        function filterTasks() {
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterEmployee = document.getElementById('filterEmployee').value;
+            const searchTerm = document.getElementById('searchTask').value.toLowerCase();
+            
+            const taskTableBody = document.getElementById('taskTableBody');
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            taskTableBody.innerHTML = '';
+            
+            const filteredTasks = tasks.filter(task => {
+                const matchesStatus = filterStatus === 'all' || task.taskStatus === filterStatus;
+                const matchesEmployee = filterEmployee === 'all' || task.employeeId == filterEmployee;
+                const matchesSearch = task.letterRef.toLowerCase().includes(searchTerm) || 
+                                    task.taskDesc.toLowerCase().includes(searchTerm) ||
+                                    task.employeeName.toLowerCase().includes(searchTerm);
+                return matchesStatus && matchesEmployee && matchesSearch;
+            });
+            
+            if (filteredTasks.length === 0) {
+                taskTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-search"></i>
+                                <p>Tiada tugas dijumpai dengan kriteria carian anda.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredTasks.forEach(task => {
+                const statusText = task.taskStatus === 'pending' ? 'Belum Selesai' : 
+                                  task.taskStatus === 'in-progress' ? 'Dalam Proses' : 'Selesai';
+                const statusClass = `status-${task.taskStatus}`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.letterRef}</td>
+                    <td>${task.taskDesc}</td>
+                    <td>
+                        <div class="employee-badge">
+                            <div class="employee-avatar" style="background: ${task.employeeColor}">${task.employeeAvatar}</div>
+                            <span>${task.employeeName}</span>
+                        </div>
+                    </td>
+                    <td><span class="status ${statusClass}">${statusText}</span></td>
+                    <td>${formatDate(task.taskDate)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <div class="action-btn btn-edit" onclick="editTask(${task.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="action-btn btn-delete" onclick="deleteTask(${task.id})" title="Padam">
+                                <i class="fas fa-trash-alt"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                taskTableBody.appendChild(row);
+            });
+        }
+        
+        function updateStats() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const totalTasks = tasks.length;
+            const pendingTasks = tasks.filter(task => task.taskStatus === 'pending').length;
+            const inProgressTasks = tasks.filter(task => task.taskStatus === 'in-progress').length;
+            const completedTasks = tasks.filter(task => task.taskStatus === 'completed').length;
+            const totalEmployees = Object.keys(employees).length;
+            
+            // Update stats cards
+            document.querySelector('.stat-pending .value').textContent = pendingTasks;
+            document.querySelector('.stat-progress .value').textContent = inProgressTasks;
+            document.querySelector('.stat-completed .value').textContent = completedTasks;
+            document.querySelector('.stat-employee .value').textContent = totalEmployees;
+            
+            // Update progress bars
+            const pendingPercent = totalTasks ? Math.round((pendingTasks / totalTasks) * 100) : 0;
+            const inProgressPercent = totalTasks ? Math.round((inProgressTasks / totalTasks) * 100) : 0;
+            const completedPercent = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            document.querySelector('.progress-section:nth-child(1) .progress-title span:last-child').textContent = `${pendingPercent}%`;
+            document.querySelector('.progress-section:nth-child(1) .progress-fill').style.width = `${pendingPercent}%`;
+            
+            document.querySelector('.progress-section:nth-child(2) .progress-title span:last-child').textContent = `${inProgressPercent}%`;
+            document.querySelector('.progress-section:nth-child(2) .progress-fill').style.width = `${inProgressPercent}%`;
+            
+            document.querySelector('.progress-section:nth-child(3) .progress-title span:last-child').textContent = `${completedPercent}%`;
+            document.querySelector('.progress-section:nth-child(3) .progress-fill').style.width = `${completedPercent}%`;
+            
+            // Update analysis
+            const analysisSection = document.querySelector('.form-group:last-child div');
+            analysisSection.innerHTML = `
+                <p><i class="fas fa-check-circle" style="color: var(--success);"></i> Tugas selesai: <strong>${completedTasks}</strong> (${completedPercent}%)</p>
+                <p><i class="fas fa-spinner" style="color: var(--secondary);"></i> Tugas dalam proses: <strong>${inProgressTasks}</strong> (${inProgressPercent}%)</p>
+                <p><i class="fas fa-clock" style="color: var(--warning);"></i> Tugas belum selesai: <strong>${pendingTasks}</strong> (${pendingPercent}%)</p>
+                <p><i class="fas fa-users" style="color: #9b59b6;"></i> Jumlah pegawai: <strong>${totalEmployees}</strong></p>
+            `;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ms-MY', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        // Initialize with sample data if empty
+        function initializeSampleData() {
+            if (!localStorage.getItem('tasks') || JSON.parse(localStorage.getItem('tasks')).length === 0) {
+                const sampleTasks = [
+                    {
+                        id: 1,
+                        letterRef: 'JPS/2023/001',
+                        taskDesc: 'Menyiapkan laporan bulanan projek pembangunan',
+                        taskStatus: 'completed',
+                        taskDate: '2023-10-15',
+                        employeeId: 1,
+                        employeeName: "Ahmad bin Ismail",
+                        employeeAvatar: "AI",
+                        employeeColor: "#3498db"
+                    },
+                    {
+                        id: 2,
+                        letterRef: 'JPS/2023/045',
+                        taskDesc: 'Mengadakan mesyuarat koordinasi dengan kontraktor',
+                        taskStatus: 'in-progress',
+                        taskDate: '2023-10-25',
+                        employeeId: 2,
+                        employeeName: "Siti Nurhaliza",
+                        employeeAvatar: "SN",
+                        employeeColor: "#9b59b6"
+                    },
+                    {
+                        id: 3,
+                        letterRef: 'JPS/2023/102',
+                        taskDesc: 'Memproses permohonan baru untuk kelulusan projek',
+                        taskStatus: 'pending',
+                        taskDate: '2023-10-30',
+                        employeeId: 3,
+                        employeeName: "Mohd Ali bin Hassan",
+                        employeeAvatar: "MA",
+                        employeeColor: "#e74c3c"
+                    },
+                    {
+                        id: 4,
+                        letterRef: 'JPS/2023/087',
+                        taskDesc: 'Menyemak spesifikasi teknikal untuk tender baru',
+                        taskStatus: 'in-progress',
+                        taskDate: '2023-11-05',
+                        employeeId: 1,
+                        employeeName: "Ahmad bin Ismail",
+                        employeeAvatar: "AI",
+                        employeeColor: "#3498db"
+                    },
+                    {
+                        id: 5,
+                        letterRef: 'JPS/2023/121',
+                        taskDesc: 'Menyediakan anggaran belanjawan untuk suku berikutnya',
+                        taskStatus: 'completed',
+                        taskDate: '2023-11-10',
+                        employeeId: 4,
+                        employeeName: "Tan Mei Ling",
+                        employeeAvatar: "TL",
+                        employeeColor: "#27ae60"
+                    }
+                ];
+                
+                localStorage.setItem('tasks', JSON.stringify(sampleTasks));
+            }
+        }
+    </script>
+</body>
+</html>
